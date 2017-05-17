@@ -1,0 +1,26 @@
+﻿import "base.proto";
+import "facttypes_base.proto";
+
+message Date: NFactType.TFact
+{
+	optional string DayOfWeek = 1;
+	optional string Designation = 2;
+	optional string TimeOfDay = 3;
+	optional string Day = 4;
+	optional string Month = 5;	
+	optional string Year = 6;
+	optional string Century = 7;
+	optional string Millenium = 8;
+}
+
+message Toponym: NFactType.TFact
+{
+	required string Name = 1;
+}
+
+message FIO: NFactType.TFact
+{
+	optional string Name = 1;
+	optional string Surname = 2;
+	optional string Patron = 3;
+}
