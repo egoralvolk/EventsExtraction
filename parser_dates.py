@@ -1,51 +1,69 @@
+import codecs
 from xml.dom import minidom
 
 import re
 
-from parser_dates_in_lead import *
+from dates_from_text import *
 from components import *
 
 
 class ParserWikiDate:
-    def __init__(self, path):
+    def __init__(self, path, path_to_text):
+        self.path_to_text = path_to_text
+        self.date_interval = []
+        self.interval_processing = False
         self.xmldoc = minidom.parse(path)
 
     def get_events(self):
         events = []
         for comp in self.xmldoc.getElementsByTagName('Date'):
-            events.append(self.__construct_component(comp))
+            event = self.__construct_event(comp)
+            if not self.interval_processing:
+                events.append(event)
+                self.date_interval.clear()
         return events
 
-    def __construct_component(self, component_xml):
-        date_to_construct = Date()
-        date_to_construct.designation = self.__extract_component_element(component_xml, 'Designation')
-        date_to_construct.time_of_day = self.__extract_component_element(component_xml, 'TimeOfDay')
-        date_to_construct.day = self.__extract_component_element(component_xml, 'Day')
-        date_to_construct.month = self.__extract_component_element(component_xml, 'Month')
-        date_to_construct.year = self.__extract_component_element(component_xml, 'Year')
-        date_to_construct.century = self.__extract_component_element(component_xml, 'Century')
-        date_to_construct.millenium = self.__extract_component_element(component_xml, 'Millenium')
-        date_to_construct.in_text = self.__extract_component_in_text(component_xml)
-        return Event(date_to_construct, self.__extract_sentence_from_lead(component_xml))
+    def __construct_event(self, event_xml):
+        date = Date()
+        date.designation = self.__extract_event_element(event_xml, 'Designation')
+        date.time_of_day = self.__extract_event_element(event_xml, 'TimeOfDay')
+        date.day = self.__extract_event_element(event_xml, 'Day')
+        date.month = self.__extract_event_element(event_xml, 'Month')
+        date.year = self.__extract_event_element(event_xml, 'Year')
+        date.century = self.__extract_event_element(event_xml, 'Century')
+        date.millenium = self.__extract_event_element(event_xml, 'Millenium')
+        date_pos = int(self.__extract_event_attribute(event_xml, 'pos'))
+        date_len = int(self.__extract_event_attribute(event_xml, 'len'))
+        date.in_text = self.__extract_event_in_text(date_pos, date_len)
+        if self.interval_processing:
+            self.interval_processing = False
+            self.date_interval.append(date)
+        elif self.__extract_event_element(event_xml, 'IsInterval') != '':
+            self.date_interval.append(date)
+            self.interval_processing = True
+        else:
+            self.date_interval.append(date)
+            self.date_interval.append(date.copy())
+        return Event(self.date_interval.copy(), self.__extract_sentence_from_lead(event_xml))
 
-    def __extract_component_attribute(self, component_xml, attr_name):
-        return component_xml.attributes[attr_name].value
+    def __extract_event_attribute(self, event_xml, attr_name):
+        return event_xml.attributes[attr_name].value
 
-    def __extract_component_element(self, component_xml, el_name):
-        el = component_xml.getElementsByTagName(el_name)
+    def __extract_event_element(self, event_xml, el_name):
+        el = event_xml.getElementsByTagName(el_name)
         if len(el) == 0:
             return ""
         return el[0].attributes['val'].value
 
-    def __extract_sentence_from_lead(self, component_xml):
-        lead_id_needed = self.__extract_component_attribute(component_xml, 'LeadID')
+    def __extract_sentence_from_lead(self, event_xml):
+        lead_id_needed = self.__extract_event_attribute(event_xml, 'LeadID')
         leads = self.xmldoc.getElementsByTagName('Lead')
 
         html_text = ''
         for lead in leads:
-            lead_id = self.__extract_component_attribute(lead, 'id')
+            lead_id = self.__extract_event_attribute(lead, 'id')
             if lead_id == lead_id_needed:
-                html_text = self.__extract_component_attribute(lead, 'text')
+                html_text = self.__extract_event_attribute(lead, 'text')
                 break
         length = len(html_text)
         res = ''
@@ -71,15 +89,22 @@ class ParserWikiDate:
                     pop_s = False
         return res
 
-    def __extract_component_in_text(self, component_xml):
-        lead_id_needed = self.__extract_component_attribute(component_xml, 'LeadID')
+    def __extract_event_in_text(self, pos, len):
+        file = codecs.open(self.path_to_text, 'r', 'utf-8')
+        text = file.read()
+        file.close()
+        return text[pos:pos+len]
+
+
+    def __extract_event_in_text_lead(self, event_xml):
+        lead_id_needed = self.__extract_event_attribute(event_xml, 'LeadID')
         leads = self.xmldoc.getElementsByTagName('Lead')
 
         html_text = ''
         for lead in leads:
-            lead_id = self.__extract_component_attribute(lead, 'id')
+            lead_id = self.__extract_event_attribute(lead, 'id')
             if lead_id == lead_id_needed:
-                html_text = self.__extract_component_attribute(lead, 'text')
+                html_text = self.__extract_event_attribute(lead, 'text')
                 break
 
         if html_text == '':
@@ -88,10 +113,10 @@ class ParserWikiDate:
         html_parser = ParserDateInLead()
         lead_terminals = html_parser.get_terminals(html_text)
 
-        component_terminals = self.__extract_component_attribute(component_xml, 'FieldsInfo')
-        component_terminals = component_terminals.split(';')[:-1]
+        event_terminals = self.__extract_event_attribute(event_xml, 'FieldsInfo')
+        event_terminals = event_terminals.split(';')[:-1]
 
         result = ''
-        for term in component_terminals:
+        for term in event_terminals:
             result += lead_terminals[term] + ' '
         return result

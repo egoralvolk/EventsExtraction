@@ -11,6 +11,7 @@ message Date: NFactType.TFact
 	optional string Year = 6;
 	optional string Century = 7;
 	optional string Millenium = 8;
+	optional string IsInterval = 9;
 }
 
 message Toponym: NFactType.TFact
@@ -23,4 +24,7 @@ message FIO: NFactType.TFact
 	optional string Name = 1;
 	optional string Surname = 2;
 	optional string Patron = 3;
+}
+message Dt: NFactType.TDate
+{
 }

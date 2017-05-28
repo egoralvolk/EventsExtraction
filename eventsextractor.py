@@ -6,7 +6,7 @@ from parser_toponyms import ParserToponym
 from parser_persons import ParserPerson
 
 
-class TomitaManager:
+class EventsExtractor:
     def __init__(self, session_name='default', path_to_tomita='./tomita/'):
         self.__path_to_tomita = os.path.abspath(path_to_tomita)
         self.__date_config = 'encoding "utf8";' \
@@ -59,7 +59,7 @@ class TomitaManager:
         subprocess.Popen([self.__path_to_tomita + '\\' + 'tomitaparser.exe',
                           'date.proto'], cwd=self.__path_to_tomita).wait()
 
-        parser = ParserWikiDate(self.__path_to_tomita + '\\date.xml')
+        parser = ParserWikiDate(self.__path_to_tomita + '\\date.xml', self.__path_to_tomita + '\\date.txt')
 
         return parser.get_events()
 
@@ -100,6 +100,7 @@ class TomitaManager:
 
     def extract_events_from_article(self, text, clear=True):
         self.__events = self.extract_date_and_sentence(text)
+        self.additionally_event_processing()
         for event in self.__events:
             event.toponyms = self.extract_toponym(event.sentence)
             event.persons = self.extract_person(event.sentence)
@@ -119,15 +120,47 @@ class TomitaManager:
 
         return self.__events
 
+    def additionally_event_processing(self):
+        for event in self.__events:
+            event.date_interval[0].year = event.date_interval[0].year.split(' ')[0]
+            event.date_interval[1].year = event.date_interval[1].year.split(' ')[0]
+            if event.date_interval[0].year.find('-ЫЙ') != -1:
+                event.date_interval[0].day = '1'
+                event.date_interval[0].month = 'ЯНВАРЬ'
+                event.date_interval[0].year = event.date_interval[0].year[0:4]
+            if event.date_interval[1].year.find('-ЫЙ') != -1:
+                event.date_interval[1].day = '31'
+                event.date_interval[1].month = 'ДЕКАБРЬ'
+                event.date_interval[1].year = event.date_interval[1].year[0:3] + '9'
+
+            if event.date_interval[0].day == '':
+                event.date_interval[0].day = '1'
+            if event.date_interval[0].month == '':
+                event.date_interval[0].month = 'ЯНВАРЬ'
+            if event.date_interval[1].month == '':
+                event.date_interval[1].month = 'ДЕКАБРЬ'
+                event.date_interval[1].day = '31'
+            elif event.date_interval[1].day == '':
+                if event.date_interval[1].month == 'ДЕКАБРЬ' or \
+                                event.date_interval[1].month == 'ОКТЯБРЬ' or \
+                                event.date_interval[1].month == 'АВГУСТ' or \
+                                event.date_interval[1].month == 'ИЮЛЬ' or \
+                                event.date_interval[1].month == 'МАЙ' or \
+                                event.date_interval[1].month == 'МАРТ' or \
+                                event.date_interval[1].month == 'ЯНВАРЬ':
+                    event.date_interval[1].day = '31'
+                elif event.date_interval[1].month == 'ФЕВРАЛЬ':
+                    event.date_interval[1].day = '28'
+                else:
+                    event.date_interval[1].day = '30'
+
 
 if __name__ == '__main__':
-    tm = TomitaManager()
-    events = tm.extract_events_from_article(
-        "В 1385 году великий князь литовский Ягайло в соответствии с Кревской унией обязался присоединить Великое "
-        "княжество Литовское к Королевству Польскому и становился королём Польши. В декабре 1926 года в Литве "
-        "произошёл военный переворот, возглавивший его лидер националистической партии Антанас Смятона установил "
-        "авторитарный режим. 22   июня   1941   года   , после нападения Германии на СССР, последовали антисоветские "
-        "мятежи   в   Литве. 22 марта 1939 года гитлеровская Германия предъявила Литве ультиматум с требованием "
-        "вернуть ей Мемельланд, который Литва была вынуждена принять. ")
+    tm = EventsExtractor()
+    # events = tm.extract_date_and_sentence("28 июля 1914 — 11 ноября 1918")
+    f = codecs.open('WOV', 'r', 'utf-8')
+    text = f.read()
+    f.close()
+    events = tm.extract_events_from_article(text)
     for event in events:
         print(event)

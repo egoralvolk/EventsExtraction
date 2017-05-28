@@ -21,9 +21,10 @@ MilleniumNum -> AnyWord<wff=/([1-2]?[0-9])|(3[0-1])/> | OrdinalNumeral | Word<gr
 Millenium -> MilleniumNum<gnc-agr[1]>+ MilleniumDescr<gnc-agr[1], rt>;
 
 
-Date-> Day interp (Date.Day) Month interp (Date.Month)
-	| Day interp (Date.Day) Month interp (Date.Month) Year interp (Date.Year)
-	| Day interp (Date.Day) Punct Month interp (Date.Month) Punct Year interp (Date.Year) Punct
+Date-> Day interp (Date.Day) Month interp (Date.Month) Year interp (Date.Year)	
+	| Day interp (Date.Day) Month interp (Date.Month) YearNum interp (Date.Year)
+	| Day interp (Date.Day) (Punct) AnyWord<wff=/(1[0-2])|(0[0-9])/> interp (Date.Month) (Punct) Year interp (Date.Year)
+	| Day interp (Date.Day) (Punct) AnyWord<wff=/(1[0-2])|(0[0-9])/> interp (Date.Month) (Punct) YearNum interp (Date.Year)
 	| Month interp (Date.Month) Year interp (Date.Year)
 	| Year interp (Date.Year)
 	| Year interp (Date.Year) Century interp (Date.Century)
@@ -39,6 +40,38 @@ Date-> Day interp (Date.Day) Month interp (Date.Month)
 	| Designation interp (Date.Designation) Century interp (Date.Century)
 	| Designation interp (Date.Designation) Century interp (Date.Century) Millenium interp (Date.Millenium)
 	| Designation interp (Date.Designation) Millenium interp (Date.Millenium); 
+	
+DateInterval -> Day interp (Date.Day) Month interp (Date.Month) Year interp (Date.Year) Hyphen interp (Date.IsInterval)
+		Day interp (Date.Day) Month interp (Date.Month) Year interp (Date.Year)
+	| Day interp (Date.Day) Month interp (Date.Month) YearNum interp (Date.Year) Hyphen interp (Date.IsInterval)
+		Day interp (Date.Day) Month interp (Date.Month) YearNum interp (Date.Year)
+	| Day interp (Date.Day) Month interp (Date.Month) Hyphen interp (Date.IsInterval)
+		Day interp (Date.Day) Month interp (Date.Month) Year interp (Date.Year)
+	| Day interp (Date.Day) Month interp (Date.Month) Hyphen interp (Date.IsInterval)
+		Day interp (Date.Day) Month interp (Date.Month) YearNum interp (Date.Year)
+	| Day interp (Date.Day) Hyphen interp (Date.IsInterval) Day interp (Date.Day) Month interp (Date.Month) Year interp (Date.Year)
+	| Day interp (Date.Day) Hyphen interp (Date.IsInterval) Day interp (Date.Day) Month interp (Date.Month) YearNum interp (Date.Year)
+	| Month interp (Date.Month) Hyphen interp (Date.IsInterval)
+		Month interp (Date.Month) Year interp (Date.Year)
+	| Month interp (Date.Month) Hyphen interp (Date.IsInterval)
+		Month interp (Date.Month) YearNum interp (Date.Year)
+	| YearNum interp (Date.Year) Hyphen interp (Date.IsInterval) Year interp (Date.Year)
+	
+	| "с" Day interp (Date.Day) Month interp (Date.Month) Year interp (Date.Year) "по" interp (Date.IsInterval)
+		Day interp (Date.Day) Month interp (Date.Month) Year interp (Date.Year)
+	| "с" Day interp (Date.Day) Month interp (Date.Month) YearNum interp (Date.Year) "по" interp (Date.IsInterval)
+		Day interp (Date.Day) Month interp (Date.Month) YearNum interp (Date.Year)
+	| "с" Day interp (Date.Day) Month interp (Date.Month) "по" interp (Date.IsInterval)
+		Day interp (Date.Day) Month interp (Date.Month) Year interp (Date.Year)
+	| "с" Day interp (Date.Day) Month interp (Date.Month) "по" interp (Date.IsInterval)
+		Day interp (Date.Day) Month interp (Date.Month) YearNum interp (Date.Year)
+	| "с" Day interp (Date.Day) "по" interp (Date.IsInterval) Day interp (Date.Day) Month interp (Date.Month) Year interp (Date.Year)
+	| "с" Day interp (Date.Day) "по" interp (Date.IsInterval) Day interp (Date.Day) Month interp (Date.Month) YearNum interp (Date.Year)
+	| "с" Month interp (Date.Month) "по" interp (Date.IsInterval)
+		Month interp (Date.Month) Year interp (Date.Year)
+	| "с" Month interp (Date.Month) "по" interp (Date.IsInterval)
+		Month interp (Date.Month) YearNum interp (Date.Year)
+	| "с" YearNum interp (Date.Year) "по" interp (Date.IsInterval) Year interp (Date.Year);
 
 
-Event -> Date;
+Event -> Date | DateInterval;
