@@ -1,9 +1,9 @@
 import subprocess
 import os
 import codecs
-from parser_dates import *
-from parser_toponyms import ParserToponym
-from parser_persons import ParserPerson
+from .parser_dates import *
+from .parser_toponyms import ParserToponym
+from .parser_persons import ParserPerson
 
 
 class EventsExtractor:
@@ -93,7 +93,7 @@ class EventsExtractor:
         f.close()
 
         subprocess.Popen([self.__path_to_tomita + '\\' + 'tomitaparser.exe',
-                          'fio.proto'], cwd=self.__path_to_tomita).wait()
+                          'fio.proto'], cwd=self.__path_to_tomita, ).wait()
 
         parser = ParserPerson(self.__path_to_tomita + '\\fio.xml')
         return parser.get_persons()

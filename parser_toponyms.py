@@ -1,5 +1,5 @@
 from xml.dom import minidom
-from components import *
+from .components import *
 
 
 class ParserToponym:
