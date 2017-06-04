@@ -18,7 +18,7 @@ class ParserWikiDate:
         events = []
         for comp in self.xmldoc.getElementsByTagName('Date'):
             ev = self.__construct_event(comp)
-            if not self.interval_processing:
+            if not self.interval_processing and ev.date_interval[0].year != '' and ev.date_interval[1].year != '':
                 events.append(ev)
                 self.date_interval.clear()
         return events

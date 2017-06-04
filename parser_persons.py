@@ -8,15 +8,15 @@ class ParserPerson:
 
     def get_persons(self):
         persons = []
-        for comp in self.xmldoc.getElementsByTagName('FIO'):
+        for comp in self.xmldoc.getElementsByTagName('Person'):
             persons.append(self.__construct_component(comp))
         return persons
 
     def __construct_component(self, component_xml):
         person = Person()
-        person.name = self.__extract_component_element(component_xml, 'Name')
-        person.surname = self.__extract_component_element(component_xml, 'Surname')
-        person.patron = self.__extract_component_element(component_xml, 'Patron')
+        person.surname = self.__extract_component_element(component_xml, 'Name_Surname')
+        person.name = self.__extract_component_element(component_xml, 'Name_FirstName')
+        person.patron = self.__extract_component_element(component_xml, 'Name_Patronymic')
         return person
 
     def __extract_component_element(self, component_xml, el_name):

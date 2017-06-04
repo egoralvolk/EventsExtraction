@@ -5,6 +5,11 @@ import "articles_base.proto";  // Файлы base.proto и articles_base.proto �
                                // Их необходимо включать в начало любого gzt-словаря.
 import "facttypes.proto";
 
+TAuxDicArticle "время года"
+{
+    key = "зима" | "весна" | "лето" | "осень"
+}
+
 TAuxDicArticle "месяц"
 {
     key = "январь" | "февраль" | "март" | "апрель" | "май" | "июнь" |
@@ -32,6 +37,11 @@ TAuxDicArticle "дата"
 }
 
 TAuxDicArticle "фио"
+{
+    key = { "alg:fio" type=CUSTOM }
+}
+
+TAuxDicArticle "person"
 {
     key = { "tomita:fio.cxx" type=CUSTOM }
 }

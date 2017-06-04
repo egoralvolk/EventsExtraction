@@ -20,12 +20,7 @@ message Toponym: NFactType.TFact
 	required string Name = 1;
 }
 
-message FIO: NFactType.TFact
+message Person: NFactType.TFact
 {
-	optional string Name = 1;
-	optional string Surname = 2;
-	optional string Patron = 3;
-}
-message Dt: NFactType.TDate
-{
+	required NFactType.TFio Name = 1;
 }

@@ -39,10 +39,10 @@ class EventsExtractor:
                             '    Input = {File =  "fio.txt" }' \
                             '    Output = {File = "fio.xml" }' \
                             '    Articles = [' \
-                            '        {Name = "фио"}' \
+                            '        {Name = "person"}' \
                             '    ]' \
                             '    Facts = [' \
-                            '        {Name = "FIO"}' \
+                            '        {Name = "Person"}' \
                             '    ]' \
                             '}'
         self.__events = []
@@ -56,8 +56,10 @@ class EventsExtractor:
         f.write(self.__date_config)
         f.close()
 
-        subprocess.Popen([self.__path_to_tomita + '\\' + 'tomitaparser.exe',
-                          'date.proto'], cwd=self.__path_to_tomita).wait()
+        p = subprocess.Popen([self.__path_to_tomita + '\\' + 'tomitaparser.exe',
+                          'date.proto'], cwd=self.__path_to_tomita, stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+        out, err = p.communicate()
 
         parser = ParserWikiDate(self.__path_to_tomita + '\\date.xml', self.__path_to_tomita + '\\date.txt')
 
@@ -72,8 +74,10 @@ class EventsExtractor:
         f.write(self.__toponym_config)
         f.close()
 
-        subprocess.Popen([self.__path_to_tomita + '\\' + 'tomitaparser.exe',
-                          'toponym.proto'], cwd=self.__path_to_tomita).wait()
+        p = subprocess.Popen([self.__path_to_tomita + '\\' + 'tomitaparser.exe',
+                              'toponym.proto'], cwd=self.__path_to_tomita, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+        out, err = p.communicate()
 
         parser = ParserToponym(self.__path_to_tomita + '\\toponym.xml')
         toponyms = parser.get_toponyms()
@@ -92,8 +96,10 @@ class EventsExtractor:
         f.write(self.__fio_config)
         f.close()
 
-        subprocess.Popen([self.__path_to_tomita + '\\' + 'tomitaparser.exe',
-                          'fio.proto'], cwd=self.__path_to_tomita, ).wait()
+        p = subprocess.Popen([self.__path_to_tomita + '\\' + 'tomitaparser.exe',
+                              'fio.proto'], cwd=self.__path_to_tomita, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+        out, err = p.communicate()
 
         parser = ParserPerson(self.__path_to_tomita + '\\fio.xml')
         return parser.get_persons()

@@ -29,6 +29,11 @@ class Date:
         d.in_text = self.in_text
         return d
 
+    def date_is_bc(self):
+        if len(self.is_bc):
+            return True
+        return False
+
     def to_datetime(self):
         # print(self.year)
         return datetime.datetime(int(self.year), months.index(self.month.lower()) + 1, int(self.day))
@@ -87,3 +92,8 @@ class Event:
 
     def get_end_date(self):
         return self.date_interval[1].to_datetime()
+
+    def date_is_bc(self):
+        if self.date_interval[0].date_is_bc() or self.date_interval[1].date_is_bc():
+            return True
+        return False

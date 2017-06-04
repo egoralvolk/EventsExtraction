@@ -1,17 +1,17 @@
 ﻿#encoding "utf8"
 
-DayNum -> AnyWord<wff=/([1-2]?[0-9])|(3[0-1])/> | OrdinalNumeral | Word<gram="NUM">;
-Day -> DayNum+;
+DayNum -> AnyWord<wff=/([1-2]?[0-9])|(3[0-1])/>;
+Day -> DayNum;
 
 Month-> Noun<kwtype="месяц">;
 
-YearNum -> AnyWord<wff=/[1-2]?[0-9]{1,3}/>;
+YearNum -> AnyWord<wff=/[1-2][0-9][0-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9]|[1-9]/>;
 YearDef -> "год" | "г" Punct | "гг" Punct;
 YearBC -> "донэ";
 YearDescr -> YearDef | YearBC interp (Date.IsBC) | YearDef YearBC interp (Date.IsBC);
 Year -> YearNum (YearDescr);
 
-Date-> (Day interp (Date.Day)) Month interp (Date.Month) YearNum interp (Date.Year) (YearDescr)
+Date-> Day interp (Date.Day) Month interp (Date.Month) YearNum interp (Date.Year) (YearDescr)
 	| Month interp (Date.Month) YearNum interp (Date.Year) (YearDescr)
 	| YearNum interp (Date.Year) YearDescr;
 
